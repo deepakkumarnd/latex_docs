@@ -1,0 +1,89 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\lhead{}
+\chead{\includegraphics[scale=0.1]{logo}}
+\rhead{}
+\fancyfoot[RF]{{\small Copyright \copyright Sourcebits Technologies Pvt Ltd.}}
+\pagestyle{fancy}
+
+\title{SocialGolf} 
+\author{Feature Documentation}
+\date{}
+
+
+\begin{document}
+\maketitle 
+\begin{center} 
+\includegraphics[scale=0.25]{logo}
+\end{center}
+\newpage
+\tableofcontents
+\newpage
+\section{Introduction}
+Social games are generally played among tens of thousands of people who are online through a web browser or devices like mobile phones. The basic idea of every social game is to provide a platform for playing games among different people across the globe. Generally social networks like facebook provides an environment for these games. But now a days the trend starts to change more towards smartphones. 
+
+Socialgolf provides a strong generic platform for creating socialgames. It covers features that are essential  to for a socialgame. As of now the framework concentrates on the golf game. The framework is extensible by adding each game module without affecting it social aspects.
+
+\section{Player Module}
+The player module includes player registration, authentication with the server, maintains the player statistics like points, virtual currency , Integration with various social networking sites like facebook.
+\subsection{Player Registration}
+Any user can register with socialgolf in two ways.
+\begin{itemize} 
+\item By creating a socialgolf account.
+\item By login using facebook
+An anonymous account is created which can be updated later.
+During the registration a set of default item which are configured by the admin is added to the player bag( Where the player keeps his things like clubs, perk, balls etc.) also a default amount of virtual currency is added to the player
+\end{itemize}
+
+\subsection{Integration with social networks}
+Socialgolf currently integrated with facebook, and can be easily integrated with other social networking  sites like twitter, google+ etc. Socialgolf uses oauth based authentication mechanism for facebook login and protects user privacy, It never stores the authentication credentials.  The player can access his friends details and invite them to join socialgolf, he can also publish his game statistics to facebook. Socialgolf uses facebook’ s latest graph api stack and fql queries for facebook integration.
+
+\subsection{Notifications}
+Socialgolf has different kinds of notificaton like notification via social networks, email notification and also it uses apple push notification. The player can alerted about their player turns, touraments, new game invitations  and game statistics using the apple push notification service.
+
+\section{Chat}
+In every social games communication among the players is important which make the the real time feeling. Social golf includes the chat functionality among the players. So whenever you are playing a game you can communicate with others using  the build in chat rather than using some external chat clients.
+
+\section{Game Module}
+Game module implements the social game logic. Basically game module includes all the game logic, the game logic may change for different games. This module can be easily extended easily by adding new logic for any socialgame. Socialgolf presently implements the very popular golf game. It supports three modes of game namely random, normal and tournament.
+
+\subsection{Game Initialization}
+Game is initialised when the game is created. Game can be created by any existing player. There exists different modes of games.
+\subsubsection{Random game}
+Random game can be played among maximum of four players the speciality of this mode is anybody can create a random game and anybody can join the random games based on some preference like course. The logic is like whenever one person want to play a random game, he has to create it. No need to invite someone to join the game. The server will check for a open matching game which already exists and adds the player to that game if found, if not then the new game is created at the server. The game status will be open and is closed when either all the four players joins the game or after the first hole is finished.
+\subsubsection{Normal Game}
+Normal game can be played among maximum of four players. Normal game can be considered as a friend game. This too can be created by any player, the difference is that the player can invite his friends from facebook or he can send email invitation to them. Once the players gets the invitation they can join the game by accepting the invitation ( just by joining it). The game status will be open till all the four players joins or the players finishes their first hole.
+\subsubsection{Tournament}
+Tournament is entirely different form the above two modes. It is a kind of global 
+game created and configured by the admin. Also at a time there can be only one tournament is possible. Once the tournament is created the users whoever registered with the socialgolf server  gets a notification. Users can join the tournament as they wish. 
+The  admin starts the tournament  and informs the participants by sending notification.
+
+\subsection{Game strategy}
+The game will start when any participant of that game sends the teeoff request. The game will have some holes, the holes depends on the course chosen for the game, each hole will have some par value, the maximum number of turns  the player will get is twice the par value of the current hole. After each turn the player will send the turn information. Server stores each of his move by storing the turn details. Turn details includes the position and impulse information. If he uses the mulligan he will have to include information in the request, as a response the player will get the last turn details which can be used to place the ball in proper position. 
+
+Once the player finishes the hole or exceeds the maximum number of allowed turns the end hole request must be sent to the server. Now the server will mark the hole finished for that player and checks weather everyone finished the same hole. If everyone finished the current hole then the hole number set to the next hole and player can continue their game, if not finished the server will set the players whoever finished the hole to a waiting state till others finishes the hole. So there can be a situation where one player is not willing to play and others are waiting for him to finish, this may create a deadlocked situation. In order to avoid this deadlock a background job will monitor the players last turn update time. If it exceeds some predefined timeout say 24 hours the player will be automatically made resign form the game.  
+
+In case of tournament the difference is that the player need not have to wait for others to finish the game. Tournament can be set be alive for a particular time period. So the whoever joins the tournament can play their game independently without any interruption  form the server. 
+The same procedure will continue till all the players complete all the holes. As the game proceeds the player can access their game statistics like score card leader board or the current hole statistics which includes information like number of turns played by that player as well the list of players who have already completed the hole.
+
+\subsection{Player Resignation}
+A player can resign from the game at any point of the game. If a player is not willing to continue the game he can inform the server that by sending the resign from game request. Once the resign request is received rd the server makes the participant inactive and releases any lock like waiting for next hole for other players. If one player if not willing to play and is not even resigning from the game the server makes him inactive automatically. A job which runs in the background makes this possible. Once the player is resigned from the game others will get a push notification.
+
+\section{Pro Shop}
+For every social social game there should be some place where the player can purchase player good and virtual money. Pro Shop implements this functionality. It is a completely customizable entity. Every item in Pro Shop can be configured by the administrator. The player can purchase different items like clubs, balls, perk, mulligan from the Pro Shop. Pro Shop also provides bundles of virtual money (skins and coins). Player can buy these bundle by paying real money and using this virtual money he can buy his items needed for continuing game. Admin configures the proshop items and sets the price for each item. Proshop provides a flexible way to add new features and change existing features.
+
+\section{Admin Panel}
+Admin panel is the place where we can do all sort of configurations for Proshop, course  , tournament and all the player  initialization parameters. Admin can modify the course if none of the active game is using that course. He can add new items to proshop or modify the coins and skins.
+Another important functionality is that admin can organize tournaments which can be played in real time with people around the globe. All the game settings for the tournament is done using admin panel. 
+
+\section{Efficiency Considerations}
+Socialgolf has been created with a keen eye on optimization. It uses mongodb as the backend database which is a document based database suitable for faster modification. Apis are optimized to fire least number of queries. Tasks which consumes the server time are all queued as the background jobs. Tools like redis and resque are used to handle the mass notificaton service as well as handling email invitations. 
+
+\section{Testing}
+Socialgolf includes complete test cases for all the game scenarios. It uses advanced testing framework RSpec. So the code is very much easy to make test and maintainable. Once a new feature is added or a change is made the test cases can be run to make ensure everything works properly this save a lot of development time and effort.
+
+
+
+\end{document} 
