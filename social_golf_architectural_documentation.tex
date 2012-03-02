@@ -1,0 +1,157 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\lhead{}
+\chead{\includegraphics[scale=0.1]{logo}}
+\rhead{}
+\lfoot{}
+\cfoot{}
+\rfoot{Copyright \copying Sourcebits Technologies Pvt Ltd.}
+
+\pagestyle{fancy}
+
+\title{SocialGolf} 
+\author{Architecture Design Documentation}
+\date{}
+
+
+\begin{document}
+\maketitle 
+\begin{center} 
+\includegraphics[scale=0.25]{logo}
+\end{center}
+\newpage
+\tableofcontents
+\newpage
+\section{Project Defnition}
+\subsection{Brief}
+\indent Social Golf is a mobile golf game that’s designed to be played individually or with a large group of players (from here on referred to as tournament play.) Individual play and tourna- ment play don’t vary when it comes to the actual game mechanics. However a tournament system keeps tracks of scores, points etc and allows for asynchronous game play and competition. Users do not have to be playing at the same time to be competitive. All tour- naments are based on a 24 hour time period in which the player needs to complete the re- quired holes of golf. Players earn high scores, tournament points and virtual currency based on their performance in the tournament. If a player chooses Individual game play, “practice round” they will still receive a score for their game but it will not count towards any tournament results etc.
+\includegraphics[scale=0.25]{logo}
+\indent The Social Golf has been designed in a modular way. The complete game logic is implemented in a generic way which can be reused to build any social game with less effort. Social Golf basically provides a platform that can be used to create general social games. The modules are well separated for easy customization and maintenance.
+
+\indent Game Engine is designed as an independent component which can be reused by all types of social games. All the customization specifc to each games are maintained in a separate module. Customization modules can be plugged into the game engine as per game specifc requirements.
+
+
+
+\section{Rails Backend Code Architecture}
+\begin{tabular}{|l|p{10cm}|}
+\hline
+File/Folder & Purpose \\
+\hline
+app/ & Contains the controllers, models, views and assets for your applica- tion. You’ll focus on this folder for the remainder of this guide. \\
+\hline
+confg/ & Confgure your application’s runtime rules, routes, database, and more. \\
+\hline
+confg/ & Confgure your application’s runtime rules, routes, database, and more. \\
+\hline
+db/ & Contains your current database schema, as well as the database migrations. \\
+\hline
+doc/ & In-depth documentation for your application. \\
+\hline
+Gemfle \& Gemfle.lock & These fles allow you to specify what gem dependencies are needed for your Rails application. \\
+\hline
+lib/ & Extended modules for your application. \\
+\hline
+log/ & Application log fles. \\
+\hline
+public/ & The only folder seen to the world as-is. Contains the static fles and compiled assets. \\
+\hline
+\end{tabular}
+
+\section{MVC Overview}
+MVC is to decouple models and views, to reduce the complexity in architectural design and to increase fexibility and maintainability of code.
+
+The model manages the behavior and data of the application domain, responds to re- quests for information about its state (usually from the view), and responds to instructions to change state (usually from the controller). The model is not necessarily merely a database; the 'model' in MVC is both the data and the business/domain logic needed to ma- nipulate the data in the application.
+The view renders the model into a form suitable for interaction, typically a user interface element. Multiple views can exist for a single model for different purposes. A view port typically has a one to one correspondence with a display surface and knows how to render to it.The controller receives user input and initiates a response by making calls on model ob- jects. A controller accepts input from the user and instructs the model and a view port to perform actions based on that input.
+Use of the Model/View/Controller (MVC) pattern results in applications that separate the different aspects of the application (input logic, business logic, and UI logic), while provid- ing a loose coupling between these elements.
+
+\section{High level Architecture : Backend}
+\small High Level - Components Architecture
+\includegraphics[scale=0.25]{logo}
+\subsection{Local Cache}
+Model of the application has responsibility to maintain local cache of the recent network requests and communicates with the server using REST APIs. This way constant data connection is not a necessity and data can be pulled back when network is available.
+\subsection{Security}
+The data stored in local cache is kept encrypted. The network transaction is made secure using HTTPS if supported at Social Golf backend.
+\subsection{Updatability}
+The design of the application is modular which makes addition of new features simple. The modular architecture helps the plug and play of new features to have zero impact on existing functionality. This is a huge beneft in long term maintenance
+\subsection{Load balancing}
+Passenger will run on top of nGinx spawns several application instances to handle large loads, ensuring that all CPU cores are properly used. When the application starts to face exceptional amount of load, Passenger automatically spawns additional instances to handle increasing concurrency. Once the load decreases, application instances are re- leased from memory, which is automatically used by the OS for caching. Everything hap- pens automatically without any system administrator action.
+\subsection{Self-healing}
+Passenger runs a separate “HOOKER” process that’s extremely small and reliable. When “watchdog” notices any problem in the application server, it gracefully restarts the com- ponent, making the application server able to heal itself without any system administrator intervention.
+\includegraphics[scale=0.25]{logo}
+\subsection{Zero-downtime restarts}
+When the new version of the application is being deployed, most applications have a short downtime (properly deployed apps can have only a few second in deployment downtime). Phusion PassengerTM doesn’t have any downtime. When the new version ap- plication code is being deployed, Passenger gradually kills old instances, replacing them with new ones in background. Old instance won’t be killed until it fnish processing its current request — this means that no connection will be reset — all will be gracefully handled. Until the instances running the latest code are up, all incoming requests are handled by older instances.
+\subsection{Security}
+The following means are going to be used to ensure maximum security:
+\begin{itemize} 
+\item Encryptcookiejars/session
+\item Encrypt user passwords bcrypt algorithm is one of the most secure encryption method which requires million of years to brute force a single password
+\item API calls are encrytped and ensures atmost security of data.
+\item Provide a layer for SQL queries to prevent from SQL injection - Even in case of us- ing MongoDB - this security has to be handled.
+\item Use tokens for every form in the application. The form data will be sent with se- curely generated tokens, making it impossible to forge a request.
+\item All database content that will be displayed in web browser is escaped by default.
+\end{itemize}
+
+\subsection{Hosting architecture}
+\includegraphics[scale=0.25]{logo}
+\section{Scalability \amp; Performance Stages}
+\subsection{Stage 1: Initial}
+\subsection{Stage 2: Separate DB server}
+\subsection{Stage 3: DB Sharding}
+\subsection{Stage 4-a: Multiple application server machines}
+\subsection{Stage 4-b: Multiple background worker machines}
+\subsection{Why MongoDB is suggested?}
+\begin{itemize}
+\item Apart from the in-built sharding abilities.
+\item Map Reduce Operations
+\item Horizontal Scalability
+\item Query Expression
+\item Atomicity
+\item Durability
+\end
+
+\section{Authentication \amp; Session Management}
+User authentication is done at two places in Social Golf one is for the admin page and the other one is user login through the mobile application. Social Golf is using oauth based authentication for login using socialnetworking services like Facebook. It also provides normal secure encrypted login for the registered users.
+\subsection{Request Flow}
+\begin{itemize}
+\item Social Golf client will connect to nginx web server by making an HTTP request.
+\item nginx passes the request for Phusion PassengerTM application server. Passenger handles all load balancing automatically, spawning new processes when necessary in order to handle growing load.
+\item ActionDispatch recognizes URL and delegates the request to an action that has been associated with the URL pattern. The action can be both full stack Rails ac- tion or bare Metal action.
+\item Thecontrollerchecksforflterslikeauthenticationrequirements,redirectinguserto login form when they’re not logged in.
+\item The controller action communicates with the database to retrieve necessary data. Commonly fetched data should be fetched once and stored in cache in order to avoid unnecessary disk IO operations. An action can send e-mail and enqueue/schedule any job to be processed in background.
+\item Thecontrolleractiondirectsthefowofdata,fnallyexposingitforviews.
+\item Views display the data. This part can be cached as well - instead of running the template engine to format data properly, the response can be fetched directly from cache.
+\item Rendered view, wrapped up with layout template, is then returned back to HTTP server and display on client’s browser.
+\end
+
+\subsection{Background Processing}
+Background job queues serve two purposes: make the application more responsive (time consuming operations are processed in background without making the user wait for them) and provide simple way to prevent the system from too much concurrent pro- cessing - the jobs get enqueued in persistent store and are processed when required re- sources are available.
+
+Resque will handle background queues in Social Golf. Here’s the workfow of this techno- logy:
+\begin{itemize}
+\item Application enqueues the job, saving it to the data store.
+\item Resque worker picks the job. The number of workers can be freely confgured and all of them work separately as different processes on different CPU cores.
+\item Once a job is picked, Resque worker forks itself. Forking is an extremely fast way of spawning a new child process identical to the parent without the operating sys- tem “bureaucracy” - instead, it’s a direct memory block copying. The parent worker never processes the data, only forked children do.
+\item When a child worker fnishes the job, it gets killed immediately.
+\end
+
+The above approach guarantees reliability. Whenever any error or crash happens during background processing, other parts of the application remain unharmed. The failed job still remains in the database, waiting to be picked up by the next worker.
+
+Forking a process for a single job ensures that all memory is allocated properly. Since the process is killed after fnishing the job instead of picking up another one, no memory leak is possible.
+
+Redis will serve as a back-end for Resque. Redis is an in-memory, persistent key-value store with ability to store data structures like lists. Since Redis is able to perform native operations on data structures, it’s extremely fast, especially for data queues.
+
+\subsection{Scheduling}
+Like for background processing, scheduling will be handled by Resque, backed by Redis.
+\subsection{Front-end Asset pipeline}
+Rails 3.1 ships with asset pipeline which is going to be heavily used in Admin section of Social Golf.
+
+The pipeline provides extremely convenient and readable way of structuring CSS and JS fles. Apart from that, it compiles the assets ahead of time (during deployment) into a single fle which is then minifed. This will result in a single, minifed JS, CSS fle (instead of a dozen or more) to be downloaded. The assets will become smaller and requiring a single request to fetch. This will signifcantly decrease load time of the application, in- creasing its responsiveness.
+
+\subsection{Overview of Rails Architecture}
+The below picture illustrates general architecture of Rails on top of which Social Golf is built.
+\includegraphics[scale=0.25]{logo}
+
+
+\end{document} 
